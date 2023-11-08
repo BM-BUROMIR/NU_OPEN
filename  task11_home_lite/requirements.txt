@@ -1,0 +1,4 @@
+python-dotenv
+fastapi==0.90.1
+uvicorn
+pydantic
