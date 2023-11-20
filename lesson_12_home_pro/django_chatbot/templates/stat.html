@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+<style>
+  body,
+  html {
+    height: 100%;
+  }
+
+  .stat-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 100px;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 60%;
+  }
+
+  th,
+  td {
+    border: 1px solid black;
+    text-align: left;
+    padding: 8px;
+  }
+
+  th {
+    background-color: #f2f2f2;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{% load static %}
+<div
+  style="position: absolute; top: 0px; right: 20px; padding: 20px; color: rgb(24, 24, 24); font-size: 25px; font-family: Trebuchet MS; text-align: right;">
+  Статистика
+</div>
+
+<div class="stat-container">
+  <!-- Таблица будет сюда добавлена через JavaScript -->
+</div>
+
+<script>
+  const statContainer = document.querySelector('.stat-container');
+
+  fetch('http://127.0.0.1:5000/api/get_stat', {  // Обновлен URL для FastAPI сервиса
+    method: "GET",
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  })
+    .then(response => response.json())
+    .then(data => {
+      // Создаем и наполняем таблицу данными
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      const tbody = document.createElement('tbody');
+
+      // Заголовок таблицы
+      thead.innerHTML = `<tr><th>Час</th><th>Количество запросов</th></tr>`;
+      table.appendChild(thead);
+
+      // Добавление строк в таблицу
+      data.message.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${item.hour}</td><td>${item.request_count}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(tbody);
+      statContainer.appendChild(table);
+    });
+</script>
+
+{% endblock %}
