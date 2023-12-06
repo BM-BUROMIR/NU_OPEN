@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
 # инициализация индексной базы
-chunk = Chunk(path_to_base="D:/GPT/Lesson_14/fastapi/Simble.txt")
+chunk = Chunk(path_to_base="./Simble.txt")
 
 # класс с типами данных параметров 
 class Item(BaseModel): 
