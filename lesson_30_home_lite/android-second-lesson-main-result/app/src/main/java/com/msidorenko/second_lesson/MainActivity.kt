@@ -18,7 +18,7 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 const val API_URL = "http://10.0.2.2:5000/api/get_answer/"
-const val API_TIMEOUT: Long = 30
+const val API_TIMEOUT: Long = 5
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,116 +26,78 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // ----------------------------
-        // находим наши элементы
         val etQuestion = findViewById<EditText>(R.id.etQuestion)
         val tvQuestion = findViewById<TextView>(R.id.tvQuestion)
         val tvResponse = findViewById<TextView>(R.id.tvResponse)
         val button = findViewById<Button>(R.id.button)
 
-        // ----------------------------
-        // задаем обработчик нажатия кнопки 'send'
         button.setOnClickListener {
-            // считываем вопрос пользователя
             val question = etQuestion.text.toString().trim()
-
-            // проверяем, пустой ли вопрос пользователя
             if (question.isNotEmpty()) {
-                // выводим уведомление на экран
                 Toast.makeText(this, question, Toast.LENGTH_SHORT).show()
-                // меняем текст в полях сверху
                 tvQuestion.text = question
                 tvResponse.text = "Please wait..."
-
-                // делаем запрос и задаем callback прямо здесь
-                getResponse(question) { response ->
-                    /* делаем действия на основном потоке, на котором же
-                       работает отображение пользовательского UI (фактически мы
-                       фризим его на время запроса) */
+                getResponse(question) { response, error ->
                     runOnUiThread {
-                        tvResponse.text = response
-                        println(response)
+                        if (response.isNotEmpty()) {
+                            tvResponse.text = response
+                        }
+                        if (error.isNotEmpty()) {
+                          Toast.makeText(this, "API FAILED!", Toast.LENGTH_LONG).show()
+                        }
                     }
                 }
             } else {
-                // выводим предупреждение, если текст от пользователя пустой
                 Toast.makeText(this, "Введите текст!", Toast.LENGTH_SHORT).show()
             }
-
         }
     }
-}
 
-
-
-
-//------------------------------------------------------------
-// Объект клиента для отправки и обработки запросов к API
-//------------------------------------------------------------
-private val client = OkHttpClient.Builder()
-    .connectTimeout(API_TIMEOUT, TimeUnit.SECONDS) // Устанавливаем таймаут соединения
-    .readTimeout(API_TIMEOUT, TimeUnit.SECONDS)    // Устанавливаем таймаут чтения
-    .writeTimeout(API_TIMEOUT, TimeUnit.SECONDS)   // Устанавливаем таймаут записи
-    .build()
-
-
-
-
-/* ------------------------------------------------------------------------------------
-                Функция для отправки и обработки запроса API
-    На вход принимает:
-        - queston: строка, в которой содержится вопрос от пользователя
-        - callback: лямбда функция, которая будет вызвана, когда мы успешно
-                    обработаем запрос (у этой функции тоже есть строковый
-                    параметр -- ответ от API в текстовом формате)
-------------------------------------------------------------------------------------*/
-private fun getResponse(question: String, callback: (String) -> Unit) {
-    // ----------------------------
-    // Формируем тело запроса
-    val requestBody = """
+    private fun getResponse(question: String, callback: (String, String) -> Unit) {
+        val requestBody = """
             {
                 "text":"$question"
             }
-        """
+        """.trimIndent()
 
-    // ----------------------------
-    // Собираем запрос
-    val request = Request.Builder()
-        .url(API_URL) // добавляем адрес
-        .addHeader("Accept", "application/json") // хедер
-        .addHeader("Content-Type", "application/json") // хедер
-        .post(requestBody.toRequestBody()) // задаем тип запроса (post) и передаем туда тело
-        .build() // билдим запрос
+        val request = Request.Builder()
+            .url(API_URL)
+            .addHeader("Accept", "application/json")
+            .addHeader("Content-Type", "application/json")
+            .post(requestBody.toRequestBody())
+            .build()
 
-
-    // ----------------------------
-    // Работаем с OkHttp
-    client.newCall(request).enqueue(object : Callback {
-        // функция, которая будет вызвана в случае ошибки отправки запроса
-        override fun onFailure(call: Call, e: IOException) {
-            // пишем в лог ошибку
-            Log.e("error", "API failed", e)
-        }
-
-        // функция, которая будет вызвана в случае получения ответа
-        override fun onResponse(call: Call, response: Response) {
-            // считываем тело ответа
-            val responseBody = response.body
-
-            // если ответ не пустой
-            if (responseBody != null) {
-                // формируем Json объект из тела ответа (прерватив его в строку)
-                val jsonObject = JSONObject(responseBody.string())
-                // ищем тег "message" и считываем его значение
-                val textResult = jsonObject.getString("message")
-                // пишем в лог
-                Log.i("data", textResult)
-                // вызываем функцию callback и передаем туда ответ от нейронки
-                callback(textResult)
-            } else {
-                // если ответ пустой, просто пишем в лог
-                Log.i("data", "empty")
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e("error", "API failed", e)
             }
-        }
-    })
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseBody = response.body?.string() // Изменено для безопасного вызова и однократного чтения
+
+                if (responseBody != null) {
+                    try {
+                        val jsonObject = JSONObject(responseBody)
+                        val textResult = jsonObject.getString("message")
+                        Log.i("data", textResult)
+                        callback(textResult,"")
+                    } catch (e: Exception) {
+                        Log.e("data", "Error parsing response", e)
+                        callback("","Ошибка разбора ответа API!")
+                    }
+                } else {
+                    Log.i("data", "empty")
+                    callback("","Ошибка разбора ответа API!")
+                }
+            }
+        })
+    }
+
+    companion object {
+        private val client = OkHttpClient.Builder()
+            .connectTimeout(API_TIMEOUT, TimeUnit.SECONDS)
+            .readTimeout(API_TIMEOUT, TimeUnit.SECONDS)
+            .writeTimeout(API_TIMEOUT, TimeUnit.SECONDS)
+            .build()
+    }
 }
