@@ -1,0 +1,9 @@
+{
+    "workbench.colorCustomizations": {
+        "scrollbarSlider.activeBackground": "#62fa1b",
+        "scrollbarSlider.hoverBackground": "#fa2a1b",
+        "scrollbarSlider.background": "#616161",
+        "minimap.background": "#00000000",
+        "scrollbar.shadow": "#00000000"
+    }
+}
