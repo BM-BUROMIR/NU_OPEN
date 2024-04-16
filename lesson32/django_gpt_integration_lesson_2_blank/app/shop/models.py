@@ -6,6 +6,7 @@ class Product(models.Model):
     description = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=8, decimal_places=2)
     on_sale = models.BooleanField(default=False)  # Новое поле "товар по акции"    
+    popular = models.BooleanField(default=False)  # Новое поле "Популярный"    
 
     def __str__(self):
         return self.name

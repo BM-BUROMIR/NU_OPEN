@@ -26,6 +26,25 @@
         {% endfor %}
     </div>
     {% endif %}
+
+    {% if products_popular %}
+    <h2>💰 Популярные товары. 🎉</h2>
+    <p>Выбирайте популярные товары.</p>
+    <div class="popular-product__container">
+        {% for product in products_popular %}
+        <a class="popular-product__item__header popular-product__item" href="{% url 'product_detail' pk=product.pk %}">
+            <h4>{{ product.name }}</h4>
+            <div class="popular-product__item__photo__container">
+                {% if product.image %}
+                <img class="popular-product__item__photo" src="{{product.image.url}}">
+                {% endif %}
+            </div>
+            <div class="popular-product__item__price">Цена: {{ product.price|floatformat:0 }} ₽</div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
 </div>
 
 {% endblock %}

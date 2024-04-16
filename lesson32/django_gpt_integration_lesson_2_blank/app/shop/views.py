@@ -7,6 +7,8 @@ def index(request):
     context = {
         'title': 'Доставка суши SusiShop',
         'products_on_sale': Product.objects.filter(on_sale=True),
+        'products_popular': Product.objects.filter(popular=True).order_by('-price')
+
     }
     return render(request, 'index.html', context)
 
