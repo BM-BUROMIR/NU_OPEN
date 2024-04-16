@@ -5,5 +5,5 @@ from shop.models import Product
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     save_as = True
-    list_display = ['id', 'name', 'price',]
-    list_editable = ['name', 'price',]
+    list_display = ['id', 'name', 'price', 'on_sale']
+    list_editable = ['name', 'price', 'on_sale',]

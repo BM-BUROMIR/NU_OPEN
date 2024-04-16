@@ -3,11 +3,29 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-    <div class="content__container">
+<div class="content__container">
 
-        <div class="center">
-            <a href="products/" class="button">В каталог</a>
-        </div>
-        
+    <div class="center">
+        <a href="products/" class="button">В каталог</a>
     </div>
+    {% if products_on_sale %}
+    <h2>💰 Скидки 🎉</h2>
+    <p>Не упустите шанс сэкономить на вашем заказе! Используйте наши акции и специальные предложения, чтобы насладиться
+        вкусными суши по выгодной цене.</p>
+    <div class="popular-product__container">
+        {% for product in products_on_sale %}
+        <a class="popular-product__item__header popular-product__item" href="{% url 'product_detail' pk=product.pk %}">
+            <h4>{{ product.name }}</h4>
+            <div class="popular-product__item__photo__container">
+                {% if product.image %}
+                <img class="popular-product__item__photo" src="{{product.image.url}}">
+                {% endif %}
+            </div>
+            <div class="popular-product__item__price">Цена: {{ product.price|floatformat:0 }} ₽</div>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
 {% endblock %}

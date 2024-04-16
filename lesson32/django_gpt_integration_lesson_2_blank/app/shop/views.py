@@ -6,6 +6,7 @@ from shop.models import Product
 def index(request):
     context = {
         'title': 'Доставка суши SusiShop',
+        'products_on_sale': Product.objects.filter(on_sale=True),
     }
     return render(request, 'index.html', context)
 
