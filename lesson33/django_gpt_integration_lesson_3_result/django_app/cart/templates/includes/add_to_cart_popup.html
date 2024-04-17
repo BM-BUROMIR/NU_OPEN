@@ -2,9 +2,11 @@
     .cart-link {
         position: relative;
     }
+
     .cart-link__icon {
         margin-bottom: 20px;
     }
+
     #cart-link__popup {
         color: #fff;
         position: fixed;
@@ -20,6 +22,7 @@
         width: 200px;
         transform: translateX(-50%);
     }
+
     .show {
         opacity: 1 !important;
     }
@@ -30,6 +33,21 @@
 </div>
 
 <script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
     function getCSRFToken() {
         const cookieValue = document.cookie
             .split('; ')
@@ -43,7 +61,9 @@
 
         const formData = new FormData();
         formData.append('product_id', productID);
-        const csrftoken = getCSRFToken();
+        //const csrftoken = getCSRFToken();
+        const csrftoken = getCookie('csrftoken');
+
 
         fetch(url, {
             method: 'POST',
@@ -54,22 +74,22 @@
 
             body: formData
         })
-        .then(response => {
-            if (response.ok) {
-                // Произошло успешное добавление в корзину
-                // Можно показать сообщение или обновить UI
-                console.log('Товар успешно добавлен в корзину');
-            } else {
-                console.error('Ошибка при добавлении товара в корзину');
-            }
-        })
-        .catch(error => {
-            console.error('Произошла ошибка:', error);
-        });
+            .then(response => {
+                if (response.ok) {
+                    // Произошло успешное добавление в корзину
+                    // Можно показать сообщение или обновить UI
+                    console.log('Товар успешно добавлен в корзину');
+                } else {
+                    console.error('Ошибка при добавлении товара в корзину');
+                }
+            })
+            .catch(error => {
+                console.error('Произошла ошибка:', error);
+            });
 
         const cartMessage = document.getElementById('cart-link__popup');
         cartMessage.textContent = `${productName} добавлен в корзину`;
-        
+
         cartMessage.classList.add('show');
 
         setTimeout(() => {
