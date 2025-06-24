@@ -242,3 +242,11 @@ litellm_uuid.txt
 .~lock*
 */photos/*
 data.json
+
+*.bin
+.lock
+
+.gradle/
+.idea
+.vscode
+.DS_Store
